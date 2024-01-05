@@ -1,0 +1,36 @@
+# Use the official Ubuntu 20.04 base image
+FROM amd64/ubuntu:20.04
+# Install gcc, g++
+RUN apt-get update && \
+    apt-get install -y curl git gcc g++ make python3
+
+# Install Nodejs 16    
+RUN apt-get install -y ca-certificates gnupg && \
+    curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt-get install -y nodejs
+# Create directories and set ownership
+RUN mkdir -p /home/node/app/node_modules
+# Switch to the /home/node/app
+WORKDIR /home/node/app/
+#Download Nodejs Repo
+RUN git clone --branch dev/nodejs14 https://github.com/AgoraIO/Basic-Recording.git && \
+    mv Basic-Recording/On-Premise-Recording-Nodejs/* . && \
+    rm -rf Basic-Recording
+#Integrate SDK
+RUN curl https://download.agora.io/ardsdk/release/Agora_Recording_SDK_for_Linux_v3.0.6_20210531-1622447901_972.tar.gz -o recordingSDK.tar.gz && \
+    tar -xzf recordingSDK.tar.gz && \
+    mv Agora_Recording_SDK_for_Linux_FULL ./record/src/sdk
+# Install node-gyp globally
+RUN npm install -g node-gyp
+# Switch to the /home/node/app/record directory
+WORKDIR /home/node/app/record
+# Run the build_debug.sh script
+RUN bash build_debug.sh
+# Switch to /home/node/app/server
+WORKDIR /home/node/app/server
+# Install NPM dependency
+RUN npm install
+# Expose port
+Expose 3000/tcp
+# Start Service
+CMD ["node", "app.js"]

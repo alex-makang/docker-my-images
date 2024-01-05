@@ -1,0 +1,18 @@
+# Use the official Ubuntu 20.04 base image
+FROM amd64/ubuntu:20.04
+# Install gcc, g++
+RUN apt-get update && \
+    apt-get install -y curl python2
+
+WORKDIR /home
+
+# Copy Script
+RUN curl https://download.agora.io/acrsdk/release/cloud_recording_tools.v3.8.0.69-202302061216-release-prod.tar.gz --output tools.tar.gz
+
+RUN tar -xf tools.tar.gz && rm tools.tar.gz
+
+WORKDIR tools
+
+# Start Service
+ENTRYPOINT ["python2", "convert.py"]
+CMD ["--help"]
