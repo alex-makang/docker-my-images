@@ -1,0 +1,95 @@
+# Use the official Ubuntu 20.04 base image
+FROM amd64/ubuntu:20.04
+# Install dependency
+RUN apt-get update && \
+    ln -sf /usr/share/zoneinfo/Asia/Chongqing /etc/localtime && \
+    apt-get install -y aptitude
+
+RUN aptitude install -y libx11-dev libxcomposite-dev libxext-dev libxfixes-dev libxdamage-dev cmake curl build-essential
+WORKDIR /home
+
+
+# Copy Script
+RUN curl https://download.agora.io/rtsasdk/release/Agora-RTC-x86_64-linux-gnu-v4.0.1-20230114_110348-252911.tgz --output AgoralinuxSDK.tar.gz
+
+RUN tar -xf AgoralinuxSDK.tar.gz && rm AgoralinuxSDK.tar.gz
+
+WORKDIR /home/agora_rtc_sdk/example/
+
+RUN bash build.sh
+
+RUN apt-get autoremove -y && apt-get purge
+
+WORKDIR /home/agora_rtc_sdk/example/out
+
+RUN echo '#!/bin/bash' >> script.sh && \
+echo 'case $1 in' >> script.sh && \
+echo '"sample_receive_datastream")' >> script.sh && \
+echo './sample_receive_datastream ${@:2};;' >> script.sh && \
+echo '"sample_receive_decrypted_h264")' >> script.sh && \
+echo './sample_receive_decrypted_h264 ${@:2};;' >> script.sh && \
+echo '"sample_receive_h264_pcm")' >> script.sh && \
+echo './sample_receive_h264_pcm ${@:2};;' >> script.sh && \
+echo '"sample_receive_mixed_audio")' >> script.sh && \
+echo './sample_receive_mixed_audio ${@:2};;' >> script.sh && \
+echo '"sample_receive_video_and_mix")' >> script.sh && \
+echo './sample_receive_video_and_mix ${@:2};;' >> script.sh && \
+echo '"sample_receive_yuv_pcm")' >> script.sh && \
+echo './sample_receive_yuv_pcm ${@:2};;' >> script.sh && \
+echo '"sample_send_aac")' >> script.sh && \
+echo './sample_send_aac ${@:2};;' >> script.sh && \
+echo '"sample_send_capture_yuv")' >> script.sh && \
+echo './sample_send_capture_yuv ${@:2};;' >> script.sh && \
+echo '"sample_send_datastream")' >> script.sh && \
+echo './sample_send_datastream ${@:2};;' >> script.sh && \
+echo '"sample_send_encrypted_h264")' >> script.sh && \
+echo './sample_send_encrypted_h264 ${@:2};;' >> script.sh && \
+echo '"sample_send_h264_dual_stream")' >> script.sh && \
+echo './sample_send_h264_dual_stream ${@:2};;' >> script.sh && \
+echo '"sample_send_h264_pcm")' >> script.sh && \
+echo './sample_send_h264_pcm ${@:2};;' >> script.sh && \
+echo '"sample_send_ivfvp8")' >> script.sh && \
+echo './sample_send_ivfvp8 ${@:2};;' >> script.sh && \
+echo '"sample_send_opus")' >> script.sh && \
+echo './sample_send_opus ${@:2};;' >> script.sh && \
+echo '"sample_send_pcm_by_cloud_proxy")' >> script.sh && \
+echo './sample_send_pcm_by_cloud_proxy ${@:2};;' >> script.sh && \
+echo '"sample_send_yuv_dual_stream")' >> script.sh && \
+echo './sample_send_yuv_dual_stream ${@:2};;' >> script.sh && \
+echo '"sample_send_yuv_pcm")' >> script.sh && \
+echo './sample_send_yuv_pcm ${@:2};;' >> script.sh && \
+echo '"sample_send_yuv_pcm_via_rtmp")' >> script.sh && \
+echo './sample_send_yuv_pcm_via_rtmp ${@:2};;' >> script.sh && \
+echo '"sample_stringuid_receive")' >> script.sh && \
+echo './sample_stringuid_receive ${@:2};;' >> script.sh && \
+echo '"sample_stringuid_send")' >> script.sh && \
+echo './sample_stringuid_send ${@:2};;' >> script.sh && \
+echo '*)' >> script.sh && \
+echo 'echo "Available Options:' >> script.sh && \
+echo 'sample_receive_datastream' >> script.sh && \
+echo 'sample_receive_decrypted_h264' >> script.sh && \
+echo 'sample_receive_h264_pcm' >> script.sh && \
+echo 'sample_receive_mixed_audio' >> script.sh && \
+echo 'sample_receive_video_and_mix' >> script.sh && \
+echo 'sample_receive_yuv_pcm' >> script.sh && \
+echo 'sample_send_aac' >> script.sh && \
+echo 'sample_send_capture_yuv' >> script.sh && \
+echo 'sample_send_datastream' >> script.sh && \
+echo 'sample_send_encrypted_h264' >> script.sh && \
+echo 'sample_send_h264_dual_stream' >> script.sh && \
+echo 'sample_send_h264_pcm' >> script.sh && \
+echo 'sample_send_ivfvp8' >> script.sh && \
+echo 'sample_send_opus' >> script.sh && \
+echo 'sample_send_pcm_by_cloud_proxy' >> script.sh && \
+echo 'sample_send_yuv_dual_stream' >> script.sh && \
+echo 'sample_send_yuv_pcm' >> script.sh && \
+echo 'sample_send_yuv_pcm_via_rtmp' >> script.sh && \
+echo 'sample_stringuid_receive' >> script.sh && \
+echo 'sample_stringuid_send"' >> script.sh && \
+echo 'esac' >> script.sh && \
+chmod +x script.sh
+
+#Set Environment Variable
+ENV LD_LIBRARY_PATH=/home/agora_rtc_sdk/agora_sdk
+# Start Service
+ENTRYPOINT ["bash", "script.sh"]
