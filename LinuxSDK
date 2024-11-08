@@ -1,5 +1,5 @@
 # Use the official Ubuntu 20.04 base image
-FROM amd64/ubuntu:20.04
+FROM amd64/ubuntu:22.04
 # Install dependency
 RUN apt-get update && \
     ln -sf /usr/share/zoneinfo/Asia/Chongqing /etc/localtime && \
@@ -10,9 +10,9 @@ WORKDIR /home
 
 
 # Copy Script
-RUN curl https://download.agora.io/rtsasdk/release/Agora-RTC-x86_64-linux-gnu-v4.0.1-20230114_110348-252911.tgz --output AgoralinuxSDK.tar.gz
+RUN curl https://download.agora.io/rtsasdk/release/Agora-RTC-x86_64-linux-gnu-v4.2.32-20240814_113547-328017.tgz -output AgoralinuxSDK.tgz
 
-RUN tar -xf AgoralinuxSDK.tar.gz && rm AgoralinuxSDK.tar.gz
+RUN tar -xf AgoralinuxSDK.tgz && rm AgoralinuxSDK.tgz
 
 WORKDIR /home/agora_rtc_sdk/example/
 
