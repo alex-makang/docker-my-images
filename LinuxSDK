@@ -10,7 +10,7 @@ WORKDIR /home
 
 
 # Copy Script
-RUN curl https://download.agora.io/rtsasdk/release/Agora-RTC-x86_64-linux-gnu-v4.2.32-20240814_113547-328017.tgz -output AgoralinuxSDK.tgz
+RUN curl https://download.agora.io/rtsasdk/release/Agora-RTC-x86_64-linux-gnu-v4.2.32-20240814_113547-328017.tgz --output AgoralinuxSDK.tgz
 
 RUN tar -xf AgoralinuxSDK.tgz && rm AgoralinuxSDK.tgz
 
